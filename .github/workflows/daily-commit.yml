@@ -2,10 +2,11 @@ name: Daily Commit Automation
 
 on:
   schedule:
-    # Runs at 9:30 AM UTC every day
     - cron: '30 9 * * *'
-  # Allow manual trigger for testing
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   create-daily-commit:
@@ -20,11 +21,16 @@ jobs:
           # Create a timestamp file
           echo "Daily update: $(date)" > daily-update.txt
           
-          # Configure git
-          git config --global user.name "GitHub Action Bot"
-          git config --global user.email "23f3003360@ds.study.iitm.ac.in"
+          # Configure git with the token for authentication
+          git config user.name "GitHub Actions Bot"
+          git config user.email "23f3003360@ds.study.iitm.ac.in"
           
-          # Add and commit the change
+          # Set the remote URL with the token embedded for authentication
+          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
+          
+          # Add, commit, and push
           git add daily-update.txt
           git commit -m "Automated daily commit by 23f3003360"
           git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
